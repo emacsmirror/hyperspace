@@ -13,19 +13,22 @@
   HS:
   #+END_EXAMPLE
 
-  The first word you enter is the /keyword/, and it picks where you
-  want to go.  The remainder of the input is an optional argument
-  which can be used to further search or direct you within that space.
+  This prompt expects a /keyword/ and a /query/.  The keyword picks
+  where you want to go, and the remainder of the input is an optional
+  argument which can be used to further search or direct you within
+  that space.
 
   Some concrete examples:
 
   | *If you enter*   | *then Hyperspace*                                        |
   |------------------+----------------------------------------------------------|
-  | "m4"             | opens mu4e and loads the first bookmarked search         |
+  | "m4"             | opens mu4e, loads the first bookmarked, updates mail     |
   | "m4 foo"         | opens mu4e and searches for "foo"                        |
   | "m4c work foo"   | switches to mu4e context "work," then searches for "foo" |
   | "el"             | opens info node =(elisp)Top=                             |
   | "el eval-region" | searches for "eval-region" in the elisp Info index       |
+  | "lf"             | opens elfeed                                             |
+  | "lf blah"        | opens elfeed, searches for "blah"                        |
   | "bb"             | shows all BBDB entries                                   |
   | "bb kenneth"     | shows all BBDB entries with a name matching "kenneth"    |
   | "ddg foo"        | searches DuckDuckGo for "foo" using browse-url           |
@@ -47,11 +50,16 @@
    Hyperspace is available in MELPA.
 
 
-** Configuring bindings
+** Minor mode, bindings
 
-   You should bind =#‘hyperspace= to an easily reachable key sequence
-   (suggested binding: =H-SPC=).  If you don’t have a hyper modifier
-   available, something like =C-s= is a good binding.
+   The bundled =hyperspace-minor-mode= binds =H-SPC= to Hyperspace.
+   If you don’t have a hyper modifier available, you can bind it to
+   =C-s= with:
+
+   #+BEGIN_SRC emacs-lisp -n -r
+     (eval-after-load "hyperspace"
+       (define-key hyperspace-minor-mode-map "\C-c s" #'hyperspace))
+   #+END_SRC
 
 
 ** Configuring actions

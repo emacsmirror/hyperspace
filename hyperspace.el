@@ -24,10 +24,37 @@
 ;;; Commentary:
 
 ;; Hyperspace is a way to get nearly anywhere from wherever you are,
-;; whether that's somewhere inside Emacs or on the web.  It's
-;; somewhere in between Quicksilver and keyword URLs.
-
-;; When you invoke Hyperspace (suggested keybinding: H-SPC),
+;; whether that's within Emacs or on the web.  It's somewhere in
+;; between Quicksilver and keyword URLs, giving you a single,
+;; consistent interface to get directly where you want to go.  It’s
+;; for things that you use often, but not often enough to justify a
+;; dedicated binding.
+;;
+;; When you enter Hyperspace, it prompts you where to go:
+;;
+;; HS:
+;;
+;; This prompt expects a keyword and a query.  The keyword picks where
+;; you want to go, and the remainder of the input is an optional
+;; argument which can be used to further search or direct you within
+;; that space.
+;;
+;; Some concrete examples:
+;;
+;; | *If you enter*   | *then Hyperspace*                                        |
+;; |------------------+----------------------------------------------------------|
+;; | "m4"             | opens mu4e, loads the first bookmarked, updates mail     |
+;; | "m4 foo"         | opens mu4e and searches for "foo"                        |
+;; | "m4c work foo"   | switches to mu4e context "work," then searches for "foo" |
+;; | "el"             | opens info node =(elisp)Top=                             |
+;; | "el eval-region" | searches for "eval-region" in the elisp Info index       |
+;; | "lf"             | opens elfeed                                             |
+;; | "lf blah"        | opens elfeed, searches for "blah"                        |
+;; | "bb"             | shows all BBDB entries                                   |
+;; | "bb kenneth"     | shows all BBDB entries with a name matching "kenneth"    |
+;; | "ddg foo"        | searches DuckDuckGo for "foo" using browse-url           |
+;; | "wp foo"         | searches Wikipedia for "foo" using browse-url            |
+;;
 
 ;;; Code:
 
@@ -44,13 +71,13 @@
 
    If the first word of QUERY matches the beginning of a mu4e
    context, return its name.  Otherwise, return NIL."
-  (loop with parts = (s-split-up-to "\\s-+" query 1)
-        with possible-context = (car parts)
-        with possible-query = (cadr parts)
-        for context in mu4e-contexts
-        for context-name = (mu4e-context-name context)
-        if (s-starts-with? possible-context context-name)
-        return (cons context-name possible-query)))
+  (cl-loop with parts = (s-split-up-to "\\s-+" query 1)
+           with possible-context = (car parts)
+           with possible-query = (cadr parts)
+           for context in mu4e-contexts
+           for context-name = (mu4e-context-name context)
+           if (s-starts-with? possible-context context-name)
+           return (cons context-name possible-query)))
 
 (defun hyperspace-action->mu4e (&optional query)
   "Search mu4e with QUERY.
@@ -60,7 +87,7 @@
 
   (mu4e-headers-search (or query (caar mu4e-bookmarks)))
   (unless query
-    (mu4e-update-mail-and-index)))
+    (mu4e-update-mail-and-index nil)))
 
 (defun hyperspace-action->mu4e-context (&optional query)
   "Look for a mu4e context in the first word of QUERY.
@@ -80,6 +107,12 @@
     (or query)
     (hyperspace-action->mu4e)))
 
+(defun hyperspace-action->elfeed (&optional query)
+  "Load elfeed, optionally searching for QUERY."
+  (elfeed)
+  (when query
+    (elfeed-search-set-filter query)))
+
 (defun hyperspace-action->info (node &optional query)
   "Open an Info buffer for NODE.
 
@@ -90,12 +123,15 @@
 
  ;; Package definitions
 
+(defvar hyperspace-history nil
+  "History of Hyperspace actions.")
+
 (defgroup hyperspace nil
-  "Options for Hyperspace"
+  "Getting there from here"
   :prefix "hyperspace-"
   :group 'applications)
 
-(defcustom hyperspace-actions
+(defcustom hyperspace-actipons
   '(("ddg" . "https://duckduckgo.com/?q=%s")
     ("dis" . "https://duckduckgo.com/?q=%s&iax=images&ia=images")
     ("wp"  . "https://en.wikipedia.org/wiki/%s")
@@ -104,15 +140,16 @@
     ("ggm" . "https://www.google.com/maps/search/%s")
     ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
     ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
-    ("bb" . #'bbdb-search-name)
-    ("m4" . #'hyperspace-action->mu4e)
-    ("m4c" . #'hyperspace-action->mu4e-context)
+    ("bb" . bbdb-search-name)
+    ("lf" . hyperspace-action->elfeed)
+    ("m4" . hyperspace-action->mu4e)
+    ("m4c" . hyperspace-action->mu4e-context)
     ("el" . (apply-partially #'hyperspace-action->info "(elisp)Top"))
-    ("av" . #'apropos-variable)
-    ("ac" . #'apropos-command)
+    ("av" . apropos-variable)
+    ("ac" . apropos-command)
     ("af" . (lambda (query) (apropos-command query t))))
 
-  "Actions for Hyperspace.
+  "Where Hyperspace should send you.
 
    Hyperspace actions a cons of (KEYWORD . DISPATCHER).  When
    Hyperspace is invoked, the keyword is extracted and looked up
@@ -131,37 +168,63 @@
   :type '(alist :key-type (string :tag "Keyword")
                 :value-type (choice
                              (function :tag "Function")
-                             (sexp :tag "Expression")
-                             (string :tag "URL Pattern"))))
+                             (string :tag "URL Pattern")
+                             (sexp :tag "Expression"))))
 
 (defcustom hyperspace-default-action
   (caar hyperspace-actions)
-  "Default action."
+  "A place to go if you don't specify one."
   :group 'hyperspace
   :type `(radio
           ,@(mapcar (lambda (action) (list 'const (car action))) hyperspace-actions)))
 
-(defvar hyperspace-history nil
-  "History of Hyperspace actions.")
+(defcustom hyperspace-max-region-size 256
+  "Maximum size of a region to consider for a Hyperspace query.
+
+   If the region is active when Hyperspace is entered, it's used
+   as the default query, unless it's more than this number of
+   characters."
+  :group 'hyperspace
+  :type 'integer)
+
+
+
+
+(defun hyperspace--cleanup (text)
+  "Clean TEXT so it can be used for a Hyperspace query."
+  (save-match-data
+    (string-trim
+     (replace-regexp-in-string (rx (1+ (or blank "\n"))) " " text))))
 
 (defun hyperspace--initial-text ()
   "Return the initial text.
 
-   If a region of the buffer is selected, it will be prefilled as
-   the Hyperspace query."
+   This is whatever's in the active region, but cleaned up."
   (when (region-active-p)
-    (string-trim (buffer-substring-no-properties (region-beginning) (region-end)))))
+    (let* ((start (region-beginning))
+           (end (region-end))
+           (size (- end start)))
+      (when (<= size hyperspace-max-region-size)
+        (hyperspace--cleanup
+         (buffer-substring-no-properties (region-beginning) (region-end)))))))
 
-(defun hyperspace--initial-query ()
-  "Return the initial query.
+(defun hyperspace--initial (initial-text)
+  "Turn INITIAL-TEXT into INITIAL-CONTENTS for reading."
+  (when initial-text (cons (concat " " initial-text) 1)))
 
-   If a region of the buffer is selected, it will be prefilled as
-   the Hyperspace query."
-  (if-let ((text (hyperspace--initial-text)))
-      (cons (concat " " text) 1)))
+(defun hyperspace--process-input (text)
+  "Process TEXT into an actionable keyword and query."
+  (let ((splits (s-split-up-to "\\s-+" text 1)))
+    (pcase splits
+      ((and (or `(,kw ,query)
+                `(,kw))
+            (guard (assoc kw hyperspace-actions))) splits)
+      (_ (list hyperspace-default-action text)))))
 
 (defun hyperspace--query ()
   "Ask the user for the Hyperspace action and query.
+
+   Returns (KEYWORD . QUERY).
 
    If the region isn't active, the user is prompted for the action and query.
 
@@ -170,12 +233,13 @@
 
    If a prefix argument is specified and the region is active,
    `HYPERSPACE-DEFAULT-ACTION' is chosen without prompting."
-  (let ((initial (hyperspace--initial-query)))
+
+  (let ((initial (hyperspace--initial-text)))
     (if (and initial current-prefix-arg)
-        (list hyperspace-default-action (string-trim (car initial)))
-    (s-split-up-to
-     "\\s-+"
-     (read-from-minibuffer "HS: " initial nil nil 'hyperspace-history) 1))))
+        (list hyperspace-default-action initial)
+      (hyperspace--process-input
+       (read-from-minibuffer "HS: " (hyperspace--initial initial) nil nil
+                             'hyperspace-history)))))
 
 (defun hyperspace--evalable-p (form)
   "Can FORM be evaluated?"
@@ -188,16 +252,15 @@
   (pcase action
     ((pred functionp) (funcall action query))
     ((pred hyperspace--evalable-p) (funcall (eval action) query))
-    ((pred stringp) (hyperspace-browse-url-pattern action query))
+    ((pred stringp) (hyperspace-action->browse-url-pattern action query))
     (_ (error "Unknown action"))))
 
 ;;;###autoload
 (defun hyperspace (keyword &optional query)
   "Execute action for keyword KEYWORD, with optional QUERY."
   (interactive (hyperspace--query))
-  (if-let ((action (cdr (assoc keyword hyperspace-actions))))
-      (hyperspace--dispatch action query)
-    (error "No action defined for keyword `%s'" keyword)))
+  (let ((action (cdr (assoc keyword hyperspace-actions))))
+    (hyperspace--dispatch (or action hyperspace-default-action) query)))
 
 ;;;###autoload
 (defun hyperspace-enter (&optional query)
@@ -209,12 +272,24 @@
   (hyperspace
    hyperspace-default-action
    (or query
-       (read-from-minibuffer (format "HS: %s " hyperspace-default-action)))))
+       (read-from-minibuffer
+        (format "HS: %s " hyperspace-default-action nil nil
+                'hyperspace-history)))))
+
+ ;; Minor mode
 
 (defvar hyperspace-minor-mode-map
   (let ((kmap (make-sparse-keymap)))
     (define-key kmap (kbd "H-SPC") #'hyperspace)
-    (define-key kmap (kbd "C-s") #'hyperspace)))
+    (define-key kmap (kbd "<H-return>") #'hyperspace-enter)
+    kmap))
+
+;;;###autoload
+(define-minor-mode hyperspace-minor-mode
+  "Global (universal) minor mode to jump from here to there."
+  nil nil hyperspace-minor-mode-map
+  :group 'hyperspace
+  :global t)
 
 (provide 'hyperspace)
 
