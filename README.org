@@ -13,26 +13,26 @@
   HS:
   #+END_EXAMPLE
 
-  This prompt expects a /keyword/ and a /query/.  The keyword picks
-  where you want to go, and the remainder of the input is an optional
-  argument which can be used to further search or direct you within
-  that space.
+  This expects a /keyword/ and a /query/.  The keyword picks where you
+  want to go, and the remainder of the input is an optional argument
+  which can be used to further search or direct you within that space.
 
-  Some concrete examples:
+  Some concrete examples illustrate this.  These all work with the
+  bundled default configuration.
 
   | *If you enter*   | *then Hyperspace*                                        |
   |------------------+----------------------------------------------------------|
-  | "m4"             | opens mu4e, loads the first bookmarked, updates mail     |
-  | "m4 foo"         | opens mu4e and searches for "foo"                        |
-  | "m4c work foo"   | switches to mu4e context "work," then searches for "foo" |
-  | "el"             | opens info node =(elisp)Top=                             |
-  | "el eval-region" | searches for "eval-region" in the elisp Info index       |
-  | "lf"             | opens elfeed                                             |
-  | "lf blah"        | opens elfeed, searches for "blah"                        |
-  | "bb"             | shows all BBDB entries                                   |
-  | "bb kenneth"     | shows all BBDB entries with a name matching "kenneth"    |
-  | "ddg foo"        | searches DuckDuckGo for "foo" using browse-url           |
-  | "wp foo"         | searches Wikipedia for "foo" using browse-url            |
+  | =m4=             | opens mu4e, loads the first bookmarked, updates mail     |
+  | =m4 foo=         | opens mu4e and searches for "foo"                        |
+  | =m4c work foo=   | switches to mu4e context "work," then searches for "foo" |
+  | =el=             | opens info node =(elisp)Top=                             |
+  | =el eval-region= | searches for "eval-region" in the elisp Info index       |
+  | =lf=             | opens elfeed                                             |
+  | =lf blah=        | opens elfeed, searches for "blah"                        |
+  | =bb=             | shows all BBDB entries                                   |
+  | =bb kenneth=     | shows all BBDB entries with a name matching "kenneth"    |
+  | =ddg foo=        | searches DuckDuckGo for "foo" using browse-url           |
+  | =wp foo=         | searches Wikipedia for "foo" using browse-url            |
 
 
 ** Regions and defaults
@@ -47,7 +47,9 @@
 
 ** Installation
 
-   Hyperspace is available in MELPA.
+   Hyperspace will be in MELPA soon.  Until then, you can clone this
+   repo, open =hyperspace.el= and run =M-x
+   package-install-from-buffer=.
 
 
 ** Minor mode, bindings
@@ -58,15 +60,15 @@
 
    #+BEGIN_SRC emacs-lisp -n -r
      (eval-after-load "hyperspace"
-       (define-key hyperspace-minor-mode-map "\C-c s" #'hyperspace))
+       (define-key hyperspace-minor-mode-map "\C-cs" #'hyperspace))
    #+END_SRC
 
 
-** Configuring actions
+** Custom actions
 
    Hyperspace ships with an embarrassing array of things I use all the
-   time, but you can configure it however you like.  All actions are
-   in =hyperspace-actions=, and take the form:
+   time, but you can make it do whatever you want.  All actions are in
+   =hyperspace-actions=, and take the form:
 
    #+BEGIN_SRC emacs-lisp -n -r
      (KEYWORD . ACTION)
