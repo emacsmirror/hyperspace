@@ -1,0 +1,84 @@
+* Hyperspace
+
+  Hyperspace is a way to get nearly anywhere from wherever you are,
+  whether that's within Emacs or on the web.  It's somewhere in
+  between [[https://qsapp.com/][Quicksilver]] and [[http://kb.mozillazine.org/Keyword.url][keyword URLs]], giving you a single,
+  consistent interface to get directly where you want to go.  It’s for
+  things that you use often, but not often enough to justify a
+  dedicated binding.
+
+  When you enter Hyperspace, it prompts you where to go:
+
+  #+BEGIN_EXAMPLE
+  HS:
+  #+END_EXAMPLE
+
+  The first word you enter is the /keyword/, and it picks where you
+  want to go.  The remainder of the input is an optional argument
+  which can be used to further search or direct you within that space.
+
+  Some concrete examples:
+
+  | *If you enter*   | *then Hyperspace*                                        |
+  |------------------+----------------------------------------------------------|
+  | "m4"             | opens mu4e and loads the first bookmarked search         |
+  | "m4 foo"         | opens mu4e and searches for "foo"                        |
+  | "m4c work foo"   | switches to mu4e context "work," then searches for "foo" |
+  | "el"             | opens info node =(elisp)Top=                             |
+  | "el eval-region" | searches for "eval-region" in the elisp Info index       |
+  | "bb"             | shows all BBDB entries                                   |
+  | "bb kenneth"     | shows all BBDB entries with a name matching "kenneth"    |
+  | "ddg foo"        | searches DuckDuckGo for "foo" using browse-url           |
+  | "wp foo"         | searches Wikipedia for "foo" using browse-url            |
+
+
+** Regions and defaults
+
+   If there’s an active region when you enter Hyperspace, the query is
+   prefilled with it, and point is positioned so you can easily enter
+   the keyword.
+
+   If there’s an active region and you give a prefix argument to
+   Hyperspace, it invokes =hyperspace-default-action=.
+
+
+** Installation
+
+   Hyperspace is available in MELPA.
+
+
+** Configuring bindings
+
+   You should bind =#‘hyperspace= to an easily reachable key sequence
+   (suggested binding: =H-SPC=).  If you don’t have a hyper modifier
+   available, something like =C-s= is a good binding.
+
+
+** Configuring actions
+
+   Hyperspace ships with an embarrassing array of things I use all the
+   time, but you can configure it however you like.  All actions are
+   in =hyperspace-actions=, and take the form:
+
+   #+BEGIN_SRC emacs-lisp -n -r
+     (KEYWORD . ACTION)
+   #+END_SRC
+
+   =ACTION= can be a function, a sexp, or a string.
+
+   When it’s a function, it’s called with the query part of the input
+   as its argument.
+
+   If it’s a sexp, it must evaluate to a function.  That function is
+   called with the query part of the input as its argument.
+
+   If it’s a string, it must contain a =%s=, which is replaced with
+   the query part of the input, then =browse-url= is called with that
+   as its argument.  This is convenience, you could get the same
+   effect with a sexp of:
+
+   #+BEGIN_SRC emacs-lisp -n -r
+     (apply-partially
+      #‘hyperspace-action->browse-url-pattern
+        "https://whatever.com?s=%s")
+   #+END_SRC
