@@ -4,7 +4,7 @@
 
 ;; Author: Ian Eure <ian@retrospec.tv>
 ;; URL: https://github.com/ieure/hyperspace-el
-;; Version: 0.8
+;; Version: 0.8.1
 ;; Package-Requires: ((emacs "25") (s "1.12.0"))
 ;; Keywords: tools, convenience
 
@@ -273,8 +273,8 @@
    hyperspace-default-action
    (or query
        (read-from-minibuffer
-        (format "HS: %s " hyperspace-default-action nil nil
-                'hyperspace-history)))))
+        (format "HS: %s " hyperspace-default-action) nil nil
+        'hyperspace-history))))
 
  ;; Minor mode
 
