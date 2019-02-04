@@ -110,8 +110,9 @@
 (defun hyperspace-action->elfeed (&optional query)
   "Load elfeed, optionally searching for QUERY."
   (elfeed)
-  (when query
-    (elfeed-search-set-filter query)))
+  (if query
+      (elfeed-search-set-filter query)
+    (elfeed-search-fetch nil)))
 
 (defun hyperspace-action->info (node &optional query)
   "Open an Info buffer for NODE.
