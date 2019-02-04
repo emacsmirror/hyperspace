@@ -131,7 +131,7 @@
   :prefix "hyperspace-"
   :group 'applications)
 
-(defcustom hyperspace-actipons
+(defcustom hyperspace-actions
   '(("ddg" . "https://duckduckgo.com/?q=%s")
     ("dis" . "https://duckduckgo.com/?q=%s&iax=images&ia=images")
     ("wp"  . "https://en.wikipedia.org/wiki/%s")
