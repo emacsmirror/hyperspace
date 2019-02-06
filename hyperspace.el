@@ -1,10 +1,10 @@
-;;; hyperspace.el --- Search Quick                       -*- lexical-binding: t; -*-
+;;; hyperspace.el --- Get there from here           -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017-2019  Ian Eure
 
 ;; Author: Ian Eure <ian@retrospec.tv>
 ;; URL: https://github.com/ieure/hyperspace-el
-;; Version: 0.8.2
+;; Version: 0.8.3
 ;; Package-Requires: ((emacs "25") (s "1.12.0"))
 ;; Keywords: tools, convenience
 
@@ -43,11 +43,6 @@
 ;;
 ;; | *If you enter*   | *then Hyperspace*                                        |
 ;; |------------------+----------------------------------------------------------|
-;; | "m4"             | opens mu4e, loads the first bookmarked, updates mail     |
-;; | "m4 foo"         | opens mu4e and searches for "foo"                        |
-;; | "m4c work foo"   | switches to mu4e context "work," then searches for "foo" |
-;; | "el"             | opens info node =(elisp)Top=                             |
-;; | "el eval-region" | searches for "eval-region" in the elisp Info index       |
 ;; | "lf"             | opens elfeed                                             |
 ;; | "lf blah"        | opens elfeed, searches for "blah"                        |
 ;; | "bb"             | shows all BBDB entries                                   |
@@ -58,6 +53,7 @@
 
 ;;; Code:
 
+(require 'subr-x)
 (require 's)
 
  ;; Action helpers
@@ -65,54 +61,6 @@
 (defun hyperspace-action->browse-url-pattern (pattern query)
   "Browse a URL former from PATTERN and QUERY."
   (browse-url (format pattern query)))
-
-(defun hyperspace--mu4e-context (query)
-  "Return a mu4e context for QUERY.
-
-   If the first word of QUERY matches the beginning of a mu4e
-   context, return its name.  Otherwise, return NIL."
-  (cl-loop with parts = (s-split-up-to "\\s-+" query 1)
-           with possible-context = (car parts)
-           with possible-query = (cadr parts)
-           for context in mu4e-contexts
-           for context-name = (mu4e-context-name context)
-           if (s-starts-with? possible-context context-name)
-           return (cons context-name possible-query)))
-
-(defun hyperspace-action->mu4e (&optional query)
-  "Search mu4e with QUERY.
-
-   If QUERY is unspecified, use the first bookmark in variable
-   ‘mu4e-bookmarks’ and update mail and index."
-
-  (mu4e-headers-search (or query (caar mu4e-bookmarks)))
-  (unless query
-    (mu4e-update-mail-and-index nil)))
-
-(defun hyperspace-action->mu4e-context (&optional query)
-  "Look for a mu4e context in the first word of QUERY.
-
-   A valid context is one which matches a left-anchored substring of
-   all defined mu4e contexts.
-
-   If found, switch to it, then call `hyperspace-action->mu4e' with
-   the remainder of QUERY.  Otherwise, call with the entire QUERY,
-   without switching the context."
-
-  (thread-first
-      (pcase (hyperspace--mu4e-context query)
-        (`(context . query)
-         (mu4e-context-switch nil context)
-         query))
-    (or query)
-    (hyperspace-action->mu4e)))
-
-(defun hyperspace-action->elfeed (&optional query)
-  "Load elfeed, optionally searching for QUERY."
-  (elfeed)
-  (if query
-      (elfeed-search-set-filter query)
-    (elfeed-search-fetch nil)))
 
 (defun hyperspace-action->info (node &optional query)
   "Open an Info buffer for NODE.
@@ -142,9 +90,6 @@
     ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
     ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
     ("bb" . bbdb-search-name)
-    ("lf" . hyperspace-action->elfeed)
-    ("m4" . hyperspace-action->mu4e)
-    ("m4c" . hyperspace-action->mu4e-context)
     ("el" . (apply-partially #'hyperspace-action->info "(elisp)Top"))
     ("av" . apropos-variable)
     ("ac" . apropos-command)
@@ -201,7 +146,7 @@
   "Return the initial text.
 
    This is whatever's in the active region, but cleaned up."
-  (when (region-active-p)
+  (when (use-region-p)
     (let* ((start (region-beginning))
            (end (region-end))
            (size (- end start)))
@@ -217,7 +162,7 @@
   "Process TEXT into an actionable keyword and query."
   (let ((splits (s-split-up-to "\\s-+" text 1)))
     (pcase splits
-      ((and (or `(,kw ,query)
+      ((and (or `(,kw ,_)
                 `(,kw))
             (guard (assoc kw hyperspace-actions))) splits)
       (_ (list hyperspace-default-action text)))))
