@@ -87,6 +87,7 @@
     ("gg"  . "https://www.google.com/search?q=%s")
     ("gis" . "https://www.google.com/search?tbm=isch&q=%s")
     ("ggm" . "https://www.google.com/maps/search/%s")
+    ("yt" . "https://www.youtube.com/results?search_query=%s")
     ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
     ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
     ("bb" . bbdb-search-name)
