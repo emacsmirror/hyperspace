@@ -160,13 +160,10 @@
 
 (defun hyperspace--process-input (text)
   "Process TEXT into an actionable keyword and query."
-  (pcase (s-split-up-to "\\s-+" text 1)
-    ((and (or `(,_kw ,_)
-              `(,_kw))
-          (guard (assoc _kw hyperspace-actions))
-          valid-splits)
-     valid-splits)
-    (_ (list hyperspace-default-action text))))
+  (let ((kw-text (s-split-up-to "\\s-+" text 1)))
+    (if (assoc (car kw-text) hyperspace-actions)
+        kw-text
+      (cons hyperspace-default-action kw-text))))
 
 (defun hyperspace--query ()
   "Ask the user for the Hyperspace action and query.
