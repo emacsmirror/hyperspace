@@ -164,7 +164,7 @@
   (let ((kw-text (s-split-up-to "\\s-+" text 1)))
     (if (assoc (car kw-text) hyperspace-actions)
         kw-text
-      (cons hyperspace-default-action kw-text))))
+      (list hyperspace-default-action text))))
 
 (defun hyperspace--query ()
   "Ask the user for the Hyperspace action and query.
