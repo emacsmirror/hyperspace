@@ -90,6 +90,7 @@
     ("yt" . "https://www.youtube.com/results?search_query=%s")
     ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
     ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
+    ("dp" . "https://packages.debian.org/%s")
     ("bb" . bbdb-search-name)
     ("el" . (apply-partially #'hyperspace-action->info "(elisp)Top"))
     ("av" . apropos-variable)
