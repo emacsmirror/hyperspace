@@ -99,10 +99,10 @@
 
   "Where Hyperspace should send you.
 
-   Hyperspace actions a cons of (KEYWORD . DISPATCHER).  When
-   Hyperspace is invoked, the keyword is extracted and looked up
-   in this alist; the remainder of the string is passed to the
-   dispatcher as a QUERY argument.
+   Hyperspace actions are a cons of (KEYWORD . DISPATCHER).  When
+   Hyperspace is invoked, the keyword is extracted from the user
+   input and looked up in this alist.  The remainder of the
+   string is passed to the dispatcher as its QUERY argument.
 
    DISPATCHER can be a function which performs the action.
 
@@ -129,12 +129,11 @@
 (defcustom hyperspace-max-region-size 256
   "Maximum size of a region to consider for a Hyperspace query.
 
-   If the region is active when Hyperspace is entered, it's used
+   If the region is active when Hyperspace is invoked, it's used
    as the default query, unless it's more than this number of
    characters."
   :group 'hyperspace
   :type 'integer)
-
 
 
 
@@ -154,7 +153,7 @@
            (size (- end start)))
       (when (<= size hyperspace-max-region-size)
         (hyperspace--cleanup
-         (buffer-substring-no-properties (region-beginning) (region-end)))))))
+         (buffer-substring-no-properties start end))))))
 
 (defun hyperspace--initial (initial-text)
   "Turn INITIAL-TEXT into INITIAL-CONTENTS for reading."
@@ -172,7 +171,8 @@
 
    Returns (KEYWORD . QUERY).
 
-   If the region isn't active, the user is prompted for the action and query.
+   If the region isn't active, the user is prompted for the
+   action and query.
 
    If the region is active, its text is used as the initial value
    for the query, and the user enters the action.
