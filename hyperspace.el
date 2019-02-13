@@ -91,6 +91,7 @@
     ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
     ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
     ("nf" . "https://www.netflix.com/search?q=%s")
+    ("bc" . "https://bandcamp.com/search?q=%s")
     ("dp" . "https://packages.debian.org/%s")
     ("bb" . bbdb-search-name)
     ("el" . (apply-partially #'hyperspace-action->info "(elisp)Top"))
