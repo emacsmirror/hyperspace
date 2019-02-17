@@ -93,6 +93,7 @@
     ("nf" . "https://www.netflix.com/search?q=%s")
     ("bc" . "https://bandcamp.com/search?q=%s")
     ("dp" . "https://packages.debian.org/%s")
+    ("imdb" . "https://www.imdb.com/find?q=peter+jackson&s=all")
     ("bb" . bbdb-search-name)
     ("el" . (apply-partially #'hyperspace-action->info "(elisp)Top"))
     ("av" . apropos-variable)
