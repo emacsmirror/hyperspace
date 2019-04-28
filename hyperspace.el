@@ -83,13 +83,17 @@
 (defcustom hyperspace-actions
   '(("ddg" . "https://duckduckgo.com/?q=%s")
     ("dis" . "https://duckduckgo.com/?q=%s&iax=images&ia=images")
-    ("wp"  . "https://en.wikipedia.org/wiki/%s")
+    ("wp"  . "https://en.wikipedia.org/w/index.php?search=%s&title=Special:Search&go=Go")
+
     ("gg"  . "https://www.google.com/search?q=%s")
     ("gis" . "https://www.google.com/search?tbm=isch&q=%s")
     ("ggm" . "https://www.google.com/maps/search/%s")
-    ("yt" . "https://www.youtube.com/results?search_query=%s")
-    ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
     ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
+    ("yt" . "https://www.youtube.com/results?search_query=%s")
+    ("imdb" . "https://www.imdb.com/find?q=%s&s=all")
+    ("dgs" . "https://www.discogs.com/search/?q=%s&type=all")
+
+    ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
     ("nf" . "https://www.netflix.com/search?q=%s")
     ("bc" . "https://bandcamp.com/search?q=%s")
     ("dp" . "https://packages.debian.org/%s")
