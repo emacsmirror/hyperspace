@@ -90,9 +90,11 @@
     ("ggm" . "https://www.google.com/maps/search/%s")
     ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
     ("yt" . "https://www.youtube.com/results?search_query=%s")
+    ("iv" . "https://invidio.us/search?q=%s")
     ("imdb" . "https://www.imdb.com/find?q=%s&s=all")
     ("dgs" . "https://www.discogs.com/search/?q=%s&type=all")
 
+    ("az". "https://www.amazon.com/s?k=%s")
     ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
     ("nf" . "https://www.netflix.com/search?q=%s")
     ("bc" . "https://bandcamp.com/search?q=%s")
