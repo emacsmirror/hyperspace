@@ -81,30 +81,45 @@
   :group 'applications)
 
 (defcustom hyperspace-actions
-  '(("ddg" . "https://duckduckgo.com/?q=%s")
+  '(
+    ;; General searching
+    ("ddg" . "https://duckduckgo.com/?q=%s")
     ("dis" . "https://duckduckgo.com/?q=%s&iax=images&ia=images")
-    ("wp"  . "https://en.wikipedia.org/w/index.php?search=%s&title=Special:Search&go=Go")
-
     ("gg"  . "https://www.google.com/search?q=%s")
-    ("gis" . "https://www.google.com/search?tbm=isch&q=%s")
     ("ggm" . "https://www.google.com/maps/search/%s")
-    ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
-    ("yt" . "https://www.youtube.com/results?search_query=%s")
-    ("iv" . "https://invidio.us/search?q=%s")
-    ("imdb" . "https://www.imdb.com/find?q=%s&s=all")
-    ("dgs" . "https://www.discogs.com/search/?q=%s&type=all")
+    ("gis" . "https://www.google.com/search?tbm=isch&q=%s")
 
+    ;; Shopping
     ("az". "https://www.amazon.com/s?k=%s")
     ("clp" . "https://portland.craigslist.org/search/sss?query=%s")
-    ("nf" . "https://www.netflix.com/search?q=%s")
+    ("eb" .  "https://www.ebay.com/sch/i.html?_nkw=%s")
+    ("alix" . "https://www.aliexpress.com/wholesale?SearchText=%s")
+
+    ;; Reference
+    ("wp"  . "https://en.wikipedia.org/w/index.php?search=%s&title=Special:Search&go=Go")
+    ("pg" . "https://www.gutenberg.org/ebooks/search/?query=%s")
+
+    ;; Music / Audio / Radio
     ("bc" . "https://bandcamp.com/search?q=%s")
+    ("dgs" . "https://www.discogs.com/search/?q=%s&type=all")
+    ("swi" . "https://short-wave.info/index.php?freq=%s&timbus=NOW")
+
+    ;; Entertainment
+    ("imdb" . "https://www.imdb.com/find?q=%s&s=all")
+    ("iv" . "https://invidio.us/search?q=%s")
+    ("nf" . "https://www.netflix.com/search?q=%s")
+    ("yt" . "https://www.youtube.com/results?search_query=%s")
+
+    ;; System administration
     ("dp" . "https://packages.debian.org/%s")
-    ("imdb" . "https://www.imdb.com/find?q=peter+jackson&s=all")
-    ("bb" . bbdb-search-name)
-    ("el" . (apply-partially #'hyperspace-action->info "(elisp)Top"))
-    ("av" . apropos-variable)
+    ("dh" . "https://hub.docker.com/search?q=%s&type=image")
+
+    ;; Emacs
     ("ac" . apropos-command)
-    ("af" . (lambda (query) (apropos-command query t))))
+    ("af" . (lambda (query) (apropos-command query t)))
+    ("av" . apropos-variable)
+    ("bb" . bbdb-search-name)
+    ("el" . (apply-partially #'hyperspace-action->info "(elisp)Top")))
 
   "Where Hyperspace should send you.
 
