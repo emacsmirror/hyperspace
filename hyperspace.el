@@ -60,7 +60,7 @@
 
 (defun hyperspace-action->browse-url-pattern (pattern query)
   "Browse a URL former from PATTERN and QUERY."
-  (browse-url (format pattern query)))
+  (browse-url (format pattern (url-hexify-string query))))
 
 (defun hyperspace-action->info (node &optional query)
   "Open an Info buffer for NODE.
