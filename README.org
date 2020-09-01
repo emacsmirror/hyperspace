@@ -55,7 +55,7 @@
 
    #+BEGIN_SRC emacs-lisp -n -r
      (eval-after-load "hyperspace"
-       (define-key hyperspace-minor-mode-map "\C-cs" #'hyperspace))
+       (lambda () (define-key hyperspace-minor-mode-map "\C-cs" #'hyperspace)))
    #+END_SRC
 
 
