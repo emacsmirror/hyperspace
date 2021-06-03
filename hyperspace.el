@@ -1,6 +1,6 @@
 ;;; hyperspace.el --- Get there from here           -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017-2019  Ian Eure
+;; Copyright (C) 2017-2019, 2021  Ian Eure
 
 ;; Author: Ian Eure <ian@retrospec.tv>
 ;; URL: https://github.com/ieure/hyperspace-el
@@ -257,7 +257,9 @@
 ;;;###autoload
 (define-minor-mode hyperspace-minor-mode
   "Global (universal) minor mode to jump from here to there."
-  nil nil hyperspace-minor-mode-map
+  :init-value nil
+  :lighter nil
+  :keymap hyperspace-minor-mode-map
   :group 'hyperspace
   :global t)
 
